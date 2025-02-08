@@ -300,6 +300,18 @@ async saveTransactions(transactions: TransactionDto[]) {
 
 ## **6. Deployment**
 
+Application is deployed on AWS, and here you can access deployed version of the API docs & try it out: 
+
+```sh
+http://insomnia-task-2-dev.eu-west-1.elasticbeanstalk.com/api
+```
+
+Regarding infrastructure behind it. 
+
+There is one EC2 instance with correct VPC, Subnet, Route tables, Security Groups & IAM Roles setup there (also it's utilized via Elastic Beanstalk for faster initial setup), that is used for the app, and database is deployed on AWS RDS PostgreSQL, also secured with VPC & etc. 
+
+If you want to connect to deployed DB from your machine, please reach me out so I can update security group inbound rules, so you can access it & take a look on the data there.
+
 ## **7. Conclusion**
 
 This document outlines the architecture of the **USDC Transaction Aggregation System**. The system is designed to handle real-time blockchain data, aggregate transactions efficiently, and provide valuable insights through REST APIs.

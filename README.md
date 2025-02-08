@@ -4,10 +4,6 @@
 
 This project is a **NestJS (TypeScript) backend service** that interacts with the **Avalanche blockchain** to fetch, aggregate, and analyze **USDC (ERC-20) transactions**. It provides an API for retrieving real-time transfer data and insights.
 
-
-
-
-
 ## Features
 
 - Connects to **Avalanche blockchain** via RPC node
@@ -15,7 +11,7 @@ This project is a **NestJS (TypeScript) backend service** that interacts with th
 - Stores transaction data in **PostgreSQL**
 - Exposes **REST API endpoints** for querying USDC transfers
 - **Swagger API documentation**
-- Dockerized DB setup
+- Dockerized local DB setup
 - Unit tests included
 
 ---
@@ -35,8 +31,8 @@ Make sure you have the following installed:
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/vlaksi/insomnia-task.git
-   cd insomnia-task
+   git clone https://github.com/vlaksi/insomnia-task-dev.git
+   cd insomnia-task-dev
    ```
 
 2. Install dependencies:
@@ -46,10 +42,14 @@ Make sure you have the following installed:
    ```
 
 3. Create a **.env** file:
+
    ```sh
    cp .env.example .env
    ```
-   Update the `.env` file with your **Avalanche RPC URL**, **PostgreSQL credentials**, and other configurations.
+
+   Update the `.env` file with your **Avalanche RPC URL**, **PostgreSQL credentials**, and other configurations. 
+   
+   For correct & real values, please reach out to me, so I will share secrets with you on secure way.
 
 ---
 
@@ -69,43 +69,38 @@ docker-compose up -d
 
 After starting the database container, run:
 
-````sh
+```sh
 npm run start:dev
+```
 
 ## **3. API Endpoints & Documentation**
 
 ### **Base URL:** `http://localhost:3000`
 
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-| GET | `/total-transferred` | Get total USDC transferred in a given time interval |
-| GET | `/top-sender-accounts` | Get Top 10 Sender Account |
-| GET | `/top-receiver-accounts` | Get Top 10 Receiver Accounts |
-| GET | `/paginated` | Get paginated transactions |
-| GET | `/largest` | Get largest transactions |
-| GET | `/:hash` | Get transaction details by hash |
+| Method | Endpoint                 | Description                                         |
+| ------ | ------------------------ | --------------------------------------------------- |
+| GET    | `/total-transferred`     | Get total USDC transferred in a given time interval |
+| GET    | `/top-sender-accounts`   | Get Top 10 Sender Account                           |
+| GET    | `/top-receiver-accounts` | Get Top 10 Receiver Accounts                        |
+| GET    | `/paginated`             | Get paginated transactions                          |
+| GET    | `/largest`               | Get largest transactions                            |
+| GET    | `/:hash`                 | Get transaction details by hash                     |
 
 Example request:
+
 ```sh
-
 curl -X GET http://localhost:3000/transactions/top-sender-accounts
-````
-
 ```
+
 ### **Swagger API Documentation**
 
 Using **Swagger UI** video:
 
 ![](https://pouch.jumpshare.com/preview/L5N1fsymAUrQmvGC80QOgnHiRvFlwSwwn1FdhUVMdnoKRlkaAtcmDMuVWJIxisT011qd8bWWaS14ZLdIV6TPpW_oha6mwurR-mNhoY4CucI)
 
-
-### **Swagger API Documentation**
-
 Once the application is running, you can access the **Swagger UI** at:
 
-```
-http://localhost:3000/api
-```
+[http://localhost:3000/api](http://localhost:3000/api)
 
 Swagger provides an interactive way to explore and test API endpoints.
 
@@ -114,32 +109,30 @@ Swagger provides an interactive way to explore and test API endpoints.
 ## **4. Project Structure**
 
 ```bash
-insomnia-task/
+insomnia-task-dev/
 ├── .elasticbeanstalk/
 ├── src/
-│   ├── transactions/          
-│   ├── usdc/                  
-│   ├── app.controller.ts      
-│   ├── app.module.ts          
-│   ├── app.service.ts         
-│   ├── main.ts                
-├── test/                      
-├── versions/                  
-├── .env.example               
-├── .dockerignore              
-├── Dockerfile                 
-├── docker-compose.yml         
-├── docker-compose.prod.yml    
-├── README.md                  
-├── package.json               
-├── package-lock.json          
-├── tsconfig.json              
-├── tsconfig.build.json        
-├── eslint.config.mjs          
-├── nest-cli.json              
-├── .gitignore                 
-├── .prettierrc                
-└── ARCHITECTURE.md            
+│   ├── transactions/
+│   ├── usdc/
+│   ├── app.controller.ts
+│   ├── app.module.ts
+│   ├── app.service.ts
+│   ├── main.ts
+├── test/
+├── versions/
+├── .env.example
+├── .dockerignore
+├── docker-compose.yml
+├── README.md
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+├── tsconfig.build.json
+├── eslint.config.mjs
+├── nest-cli.json
+├── .gitignore
+├── .prettierrc
+└── ARCHITECTURE.md
 ```
 
 ---
@@ -156,12 +149,17 @@ npm run test
 
 ## **6. Deployment**
 
-If running locally for development, only start PostgreSQL in Docker and run the app outside Docker:
+Application is deployed on AWS, and here you can access deployed version of the API docs & try it out: 
 
 ```sh
-docker-compose up -d
-npm run start:dev
+http://insomnia-task-2-dev.eu-west-1.elasticbeanstalk.com/api
 ```
+
+Regarding infrastructure behind it. 
+
+There is one EC2 instance with correct VPC, Subnet, Route tables, Security Groups & IAM Roles setup there (also it's utilized via Elastic Beanstalk for faster initial setup), that is used for the app, and database is deployed on AWS RDS PostgreSQL, also secured with VPC & etc. 
+
+If you want to connect to deployed DB from your machine, please reach me out so I can update security group inbound rules, so you can access it & take a look on the data there.
 
 ---
 
