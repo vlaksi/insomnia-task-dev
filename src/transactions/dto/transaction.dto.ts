@@ -13,9 +13,6 @@ export class TransactionDto {
   })
   timestamp: Date;
 
-  @ApiProperty({ description: 'Transaction Index within Block', example: 5 })
-  transactionIndex: number;
-
   @ApiProperty({ description: 'Sender Address', example: '0xABCDEF123456...' })
   sender: string;
 
