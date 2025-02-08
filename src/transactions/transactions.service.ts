@@ -105,17 +105,19 @@ export class TransactionsService {
         );
       }
 
-      // Calculate the cutoff time
-      const cutoffTime = new Date(Date.now() - intervalInMinutes * 60 * 1000);
+      // Ensure cutoff time is in UTC and formatted properly for SQL
+      const cutoffTime = new Date(
+        Date.now() - intervalInMinutes * 60 * 1000,
+      ).toISOString();
 
-      const result: { total: number } | undefined =
+      const result: { total: string | null } | undefined =
         await this.transactionsRepository
           .createQueryBuilder('transaction')
           .select('SUM(transaction.amount)', 'total')
           .where('transaction.timestamp >= :cutoffTime', { cutoffTime })
           .getRawOne();
 
-      return result?.total || 0;
+      return Number(result?.total) || 0;
     } catch (error: unknown) {
       this.logger.error('Failed to calculate total USDC transferred', error);
 
@@ -132,30 +134,67 @@ export class TransactionsService {
   async getTopSenderAccounts(): Promise<
     { senderAddress: string; total: number }[]
   > {
-    return await this.transactionsRepository
-      .createQueryBuilder('transaction')
-      .select('transaction.sender', 'address')
-      .addSelect('SUM(transaction.amount)', 'total')
-      .groupBy('transaction.sender')
-      .orderBy('total', 'DESC')
-      .limit(10)
-      .getRawMany();
+    try {
+      const result = await this.transactionsRepository
+        .createQueryBuilder('transaction')
+        .select('transaction.sender', 'address')
+        .addSelect('SUM(transaction.amount)', 'total')
+        .groupBy('transaction.sender')
+        .orderBy('total', 'DESC')
+        .limit(10)
+        .getRawMany<{ senderAddress: string; total: number }>();
+
+      if (!result || result.length === 0) {
+        this.logger.warn('No sender accounts found.');
+        return [];
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error('Failed to fetch top sender accounts', error);
+      throw new InternalServerErrorException(
+        'An error occurred while fetching top sender accounts.',
+      );
+    }
   }
 
   async getTopReceiverAccounts(): Promise<
     { receiverAddress: string; total: number }[]
   > {
-    return await this.transactionsRepository
-      .createQueryBuilder('transaction')
-      .select('transaction.receiver', 'address')
-      .addSelect('SUM(transaction.amount)', 'total')
-      .groupBy('transaction.receiver')
-      .orderBy('total', 'DESC')
-      .limit(10)
-      .getRawMany();
+    try {
+      const result = await this.transactionsRepository
+        .createQueryBuilder('transaction')
+        .select('transaction.receiver', 'address')
+        .addSelect('SUM(transaction.amount)', 'total')
+        .groupBy('transaction.receiver')
+        .orderBy('total', 'DESC')
+        .limit(10)
+        .getRawMany<{ receiverAddress: string; total: number }>();
+
+      if (!result || result.length === 0) {
+        this.logger.warn('No receiver accounts found.');
+        return [];
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error('Failed to fetch top receiver accounts', error);
+      throw new InternalServerErrorException(
+        'An error occurred while fetching top receiver accounts.',
+      );
+    }
   }
 
-  async getPaginatedTransactions(page: number, limit: number) {
+  async getPaginatedTransactions(
+    page: number,
+    limit: number,
+  ): Promise<{
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    transactions: Transaction[];
+  } | null> {
     try {
       if (
         !Number.isInteger(page) ||

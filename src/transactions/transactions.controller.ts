@@ -80,8 +80,29 @@ export class TransactionsController {
     description:
       'Retrieves the top 10 accounts that have highest total amount sent. The response includes the sender address and the total amount sent.',
   })
-  async getTopAccounts() {
-    return await this.transactionsService.getTopSenderAccounts();
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the top 10 sender accounts.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal Server Error - Failed to fetch top sender accounts.',
+  })
+  async getTopSenderAccounts() {
+    try {
+      const topSenders = await this.transactionsService.getTopSenderAccounts();
+
+      if (!topSenders || topSenders.length === 0) {
+        return { message: 'No sender accounts found.' };
+      }
+
+      return topSenders;
+    } catch (error: unknown) {
+      this.logger.error('Failed to fetch top sender accounts', error);
+      throw new InternalServerErrorException(
+        'An unexpected error occurred while fetching top sender accounts.',
+      );
+    }
   }
 
   @Get('top-receiver-accounts')
@@ -90,8 +111,31 @@ export class TransactionsController {
     description:
       'Retrieves the top 10 accounts that have highest total amount received. The response includes the receiver address and the total amount received.',
   })
-  async getReceiverAccounts() {
-    return await this.transactionsService.getTopReceiverAccounts();
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the top 10 receiver accounts.',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Internal Server Error - Failed to fetch top receiver accounts.',
+  })
+  async getTopReceiverAccounts() {
+    try {
+      const topReceivers =
+        await this.transactionsService.getTopReceiverAccounts();
+
+      if (!topReceivers || topReceivers.length === 0) {
+        return { message: 'No receiver accounts found.' };
+      }
+
+      return topReceivers;
+    } catch (error: unknown) {
+      this.logger.error('Failed to fetch top receiver accounts', error);
+      throw new InternalServerErrorException(
+        'An unexpected error occurred while fetching top receiver accounts.',
+      );
+    }
   }
 
   @Get('paginated')
@@ -110,7 +154,7 @@ export class TransactionsController {
     name: 'limit',
     required: false,
     example: 10,
-    description: 'Number of transactions per page (default: 10)',
+    description: 'Number of transactions per page (default: 10, max: 100)',
   })
   @ApiResponse({ status: 200, description: 'Returns paginated transactions' })
   @ApiResponse({ status: 400, description: 'Invalid query parameters' })
@@ -121,7 +165,7 @@ export class TransactionsController {
   ) {
     try {
       const parsedPage = Number(page);
-      const parsedLimit = Number(limit);
+      let parsedLimit = Number(limit);
 
       if (
         isNaN(parsedPage) ||
@@ -132,6 +176,10 @@ export class TransactionsController {
         throw new BadRequestException(
           'Page and limit must be positive integers.',
         );
+      }
+
+      if (parsedLimit > 100) {
+        parsedLimit = 100;
       }
 
       return await this.transactionsService.getPaginatedTransactions(
@@ -158,7 +206,8 @@ export class TransactionsController {
     required: false,
     type: Number,
     example: 10,
-    description: 'Number of largest transactions to return (default: 10)',
+    description:
+      'Number of largest transactions to return (default: 10, max: 100)',
   })
   @ApiResponse({
     status: 200,
@@ -174,9 +223,14 @@ export class TransactionsController {
   })
   async getLargestTransactions(@Query('limit') limit: string) {
     try {
-      const parsedLimit = parseInt(limit, 10);
+      let parsedLimit = parseInt(limit, 10);
+
       if (isNaN(parsedLimit) || parsedLimit <= 0) {
         throw new BadRequestException('Limit must be a positive integer.');
+      }
+
+      if (parsedLimit > 100) {
+        parsedLimit = 100;
       }
 
       return await this.transactionsService.getLargestTransactions(parsedLimit);
@@ -214,6 +268,7 @@ export class TransactionsController {
 
       const transaction =
         await this.transactionsService.getTransactionByHash(hash);
+
       if (!transaction) {
         throw new NotFoundException('Transaction not found.');
       }

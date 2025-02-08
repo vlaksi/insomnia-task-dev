@@ -2,8 +2,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Contract, ethers, EventLog, JsonRpcApiProvider } from 'ethers';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as dotenv from 'dotenv';
-import { TransactionsService } from 'src/transactions/transactions.service';
-import { TransactionDto } from 'src/transactions/dto/transaction.dto';
+import { TransactionsService } from '../transactions/transactions.service';
+import { TransactionDto } from '../transactions/dto/transaction.dto';
 
 dotenv.config();
 
@@ -19,6 +19,7 @@ export class UsdcService implements OnModuleInit {
     try {
       this.provider = new ethers.JsonRpcProvider(process.env.AVALANCHE_RPC_URL);
 
+      // Transfer event signature for ERC-20 tokens
       const usdcAbi = [
         'event Transfer(address indexed from, address indexed to, uint256 amount)',
       ];
@@ -43,7 +44,7 @@ export class UsdcService implements OnModuleInit {
     await this.getAndStoreTransactions();
   }
 
-  private async getLatestBlock(): Promise<number> {
+  async getLatestBlock(): Promise<number> {
     try {
       return await this.provider.getBlockNumber();
     } catch (error) {
@@ -52,7 +53,7 @@ export class UsdcService implements OnModuleInit {
     }
   }
 
-  private async getLastStoredBlock(): Promise<number> {
+  async getLastStoredBlock(): Promise<number> {
     try {
       const lastTransaction =
         await this.transactionsService.getLastTransaction();
@@ -65,9 +66,7 @@ export class UsdcService implements OnModuleInit {
     }
   }
 
-  private async saveTransactions(
-    transactions: TransactionDto[],
-  ): Promise<void> {
+  async saveTransactions(transactions: TransactionDto[]): Promise<void> {
     try {
       await this.transactionsService.saveTransactions(transactions);
       this.logger.log(
@@ -79,9 +78,7 @@ export class UsdcService implements OnModuleInit {
     }
   }
 
-  private async processTransferEvents(
-    events: EventLog[],
-  ): Promise<TransactionDto[]> {
+  async processTransferEvents(events: EventLog[]): Promise<TransactionDto[]> {
     this.logger.log(`Found ${events.length} USDC transfer events.`);
 
     const transactions: TransactionDto[] = [];
@@ -92,7 +89,7 @@ export class UsdcService implements OnModuleInit {
         if (!block) {
           throw new Error(`Block ${event.blockNumber} not found.`);
         }
-        const timestamp = block ? new Date(block.timestamp * 1000) : null;
+        const timestamp = new Date(block.timestamp * 1000);
         const amount = event.args[2] as ethers.BigNumberish;
 
         transactions.push({
@@ -109,6 +106,7 @@ export class UsdcService implements OnModuleInit {
           `Error processing event ${event.transactionHash}:`,
           eventError,
         );
+        throw eventError;
       }
     }
 
