@@ -11,7 +11,6 @@ async function bootstrap() {
       'API for fetching, aggregating, and analyzing USDC transfers on the Avalanche blockchain.',
     )
     .setVersion('1.0')
-    .addTag('USDC')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
