@@ -19,6 +19,8 @@ The system fetches USDC transactions from the Avalanche blockchain, stores them 
 
 ### **2.1 High-Level Architecture**
 
+![System Architecture](resources/insomnia-c4.drawio.png)
+
 The system is built using **NestJS** with **TypeORM** for database interactions and **Ethers.js** for blockchain event processing. The architecture consists of:
 
 1. **USDC Service** - Fetches USDC transfers from the blockchain.
