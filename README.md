@@ -98,6 +98,15 @@ Using **Swagger UI** video:
 
 ![](https://pouch.jumpshare.com/preview/L5N1fsymAUrQmvGC80QOgnHiRvFlwSwwn1FdhUVMdnoKRlkaAtcmDMuVWJIxisT011qd8bWWaS14ZLdIV6TPpW_oha6mwurR-mNhoY4CucI)
 
+
+![01-total-transferred](resources/01-total-transferred.gif)
+
+![02-top-send-and-receiver](resources/02-top-send-and-receiver.gif)
+
+![03-largest](resources/03-largest.gif)
+
+![04-hash](resources/04-hash.gif)
+
 Once the application is running, you can access the **Swagger UI** at:
 
 [http://localhost:3000/api](http://localhost:3000/api)
