@@ -96,9 +96,6 @@ curl -X GET http://localhost:3000/transactions/top-sender-accounts
 
 Using **Swagger UI** video:
 
-![](https://pouch.jumpshare.com/preview/L5N1fsymAUrQmvGC80QOgnHiRvFlwSwwn1FdhUVMdnoKRlkaAtcmDMuVWJIxisT011qd8bWWaS14ZLdIV6TPpW_oha6mwurR-mNhoY4CucI)
-
-
 ![01-total-transferred](resources/01-total-transferred.gif)
 
 ![02-top-send-and-receiver](resources/02-top-send-and-receiver.gif)
